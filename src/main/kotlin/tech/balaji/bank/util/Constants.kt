@@ -9,13 +9,13 @@ fun accountNumAlreadyExists(accountNumber: String): String = "Account Number $ac
 
 fun accountDetailsNotAvailable(
     accountNumber: String,
-    id: Long? = null,
+    id: Int? = null,
 ): String =
     "Bank details are not available for the given account number $accountNumber ${if (id != null) "/ ID : $id" else ""}"
 
 fun throwAccountDetailsNotAvailable(
     accountNumber: String,
-    id: Long? = null,
+    id: Int? = null,
 ): Nothing =
     throw BankApiException(
         message = accountDetailsNotAvailable(accountNumber, id),

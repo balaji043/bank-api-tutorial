@@ -13,7 +13,7 @@ interface BankRepository {
 
     fun save(bank: Bank): Bank
 
-    fun findById(id: Long): Optional<Bank>
+    fun findById(id: Int): Optional<Bank>
 
     fun delete(get: Bank)
 

@@ -8,7 +8,7 @@ data class Bank(
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    var id: Long? = null,
+    var id: Int? = null,
 
     @Column(nullable = false, unique = true)
     @field:NotNull

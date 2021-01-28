@@ -2,6 +2,7 @@ package tech.balaji.bank.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import org.hamcrest.Matchers.equalTo
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -36,7 +37,7 @@ internal class BankControllerTest @Autowired constructor(
         @Test
         fun `should add a new bank`() {
             /* given */
-            val newBank = Bank(
+            val bank = Bank(
                 accountNumber = "uniqueAccountNumber",
                 transactionFee = 12.0,
                 trustFee = 1.0,
@@ -45,20 +46,21 @@ internal class BankControllerTest @Autowired constructor(
             /* when */
             val postPerformRequest = mockMvc.post(baseUri) {
                 contentType = MediaType.APPLICATION_JSON
-                content = objectMapper.writeValueAsString(newBank)
+                content = objectMapper.writeValueAsString(bank)
             }
 
-            newBank.id = getBankId(postPerformRequest)
+            bank.id = getBankId(postPerformRequest)
 
             /* Then */
             postPerformRequest
                 .andDo { print() }
                 .andExpect {
                     status { isCreated() }
-                    content {
-                        contentType(MediaType.APPLICATION_JSON)
-                        json(objectMapper.writeValueAsString(newBank))
-                    }
+                    content { contentType(MediaType.APPLICATION_JSON) }
+                    jsonPath("$.id", equalTo(bank.id))
+                    jsonPath("$.accountNumber", equalTo(bank.accountNumber))
+                    jsonPath("$.transactionFee", equalTo(bank.transactionFee))
+                    jsonPath("$.trustFee", equalTo(bank.trustFee))
                 }
         }
 
@@ -116,10 +118,11 @@ internal class BankControllerTest @Autowired constructor(
                 .andDo { print() }
                 .andExpect {
                     status { isOk() }
-                    content {
-                        contentType(MediaType.APPLICATION_JSON)
-                        json(objectMapper.writeValueAsString(updateBankValue))
-                    }
+                    content { contentType(MediaType.APPLICATION_JSON) }
+                    jsonPath("$.id", equalTo(updateBankValue.id))
+                    jsonPath("$.accountNumber", equalTo(updateBankValue.accountNumber))
+                    jsonPath("$.transactionFee", equalTo(updateBankValue.transactionFee))
+                    jsonPath("$.trustFee", equalTo(updateBankValue.trustFee))
                 }
         }
 
@@ -142,9 +145,7 @@ internal class BankControllerTest @Autowired constructor(
             postPerformRequest
                 .andDo { print() }
                 .andExpect {
-                    status {
-                        status { isBadRequest() }
-                    }
+                    status { isBadRequest() }
                     content { string(ID_MANDATORY) }
                 }
         }
@@ -202,7 +203,10 @@ internal class BankControllerTest @Autowired constructor(
                     status { isOk() }
                     content {
                         contentType(MediaType.APPLICATION_JSON)
-                        json(objectMapper.writeValueAsString(listOf(bank)))
+                        jsonPath("$[0].id", equalTo(bank.id))
+                        jsonPath("$[0].accountNumber", equalTo(bank.accountNumber))
+                        jsonPath("$[0].transactionFee", equalTo(bank.transactionFee))
+                        jsonPath("$[0].trustFee", equalTo(bank.trustFee))
                     }
                 }
         }
@@ -228,10 +232,13 @@ internal class BankControllerTest @Autowired constructor(
                     status { isOk() }
                     content {
                         contentType(MediaType.APPLICATION_JSON)
-                        json(objectMapper.writeValueAsString(bank))
-                    }
-                }
 
+                    }
+                    jsonPath("$.id", equalTo(bank.id))
+                    jsonPath("$.accountNumber", equalTo(bank.accountNumber))
+                    jsonPath("$.transactionFee", equalTo(bank.transactionFee))
+                    jsonPath("$.trustFee", equalTo(bank.trustFee))
+                }
         }
 
         @Test
@@ -311,7 +318,7 @@ internal class BankControllerTest @Autowired constructor(
         return bank
     }
 
-    private fun getBankId(postPerformRequest: ResultActionsDsl): Long? {
+    private fun getBankId(postPerformRequest: ResultActionsDsl): Int? {
         return objectMapper.readValue<Bank>(
             postPerformRequest
                 .andReturn()
